@@ -60,6 +60,12 @@ class UserController {
         { expiresIn: JWT_EXPIRES_IN }
       );
 
+      res.cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'Strict',
+        maxAge: 60 * 60 * 1000,
+      });
+
       return res.json({
         message: 'Login successful',
         token,

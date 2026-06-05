@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
-const { getDb } = require('../config/mongo.config.js');
 
 const projectSchema = new mongoose.Schema({
     title: {
+        type: String,
+        required: true
+    },
+    owner: {
         type: String,
         required: true
     },
@@ -32,7 +35,6 @@ const projectSchema = new mongoose.Schema({
     }
 });
 
-const db = getDb();
-const Project = db.model('Project', projectSchema);
+const Project = mongoose.model('Project', projectSchema);
 
 module.exports = Project;
