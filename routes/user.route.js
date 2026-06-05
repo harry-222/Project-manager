@@ -1,12 +1,10 @@
 const express = require('express');
 const userRouter = express.Router();
 
-userRouter.post('/register', (req, res) => {
-  res.send('POST /api/auth/register endpoint is created');
-});
+const UserController = require('../controllers/user.controller.js');
 
-userRouter.post('/login', (req, res) => {
-  res.send('POST /api/auth/login endpoint is created');
-});
+userRouter.post('/register', UserController.register);
+
+userRouter.post('/login', UserController.login);
 
 module.exports = userRouter;

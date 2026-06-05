@@ -1,12 +1,38 @@
-export default class Project {
-    constructor(id, title, description, technologies, githubLink, liveLink, image, createdAt) {
-        this.title = title;
-        this.description = description;
-        this.technologies = technologies;
-        this.githubLink = githubLink;
-        this.liveLink = liveLink;
-        this.image = image;
-        this.createdAt = createdAt;
-        this._id = id;
+const mongoose = require('mongoose');
+const { getDb } = require('../config/mongo.config.js');
+
+const projectSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
+    technologies: {
+        type: [String],
+        required: true
+    },
+    githubLink: {
+        type: String,
+        required: true
+    },
+    liveLink: {
+        type: String,
+        required: true
+    },
+    image: {
+        type: String,
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
     }
-}
+});
+
+const db = getDb();
+const Project = db.model('Project', projectSchema);
+
+module.exports = Project;
