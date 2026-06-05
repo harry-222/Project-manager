@@ -3,6 +3,11 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 
+const userRoutes = require('./routes/user.route.js');
+const projectRoutes = require('./routes/project.route.js');
+const skillRoutes = require('./routes/skill.route.js');
+const messageRoutes = require('./routes/message.route.js');
+
 dotenv.config();
 
 const app = express();
@@ -11,8 +16,13 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-  res.send('Hello, World!');
+  res.send('API is running successfully');
 });
+
+app.use('/api/auth', userRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/skills', skillRoutes);
+app.use('/api/messages', messageRoutes);
 
 const PORT = process.env.PORT || 3000;
 
