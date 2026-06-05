@@ -7,8 +7,9 @@ const userRoutes = require('./routes/user.route.js');
 const projectRoutes = require('./routes/project.route.js');
 const skillRoutes = require('./routes/skill.route.js');
 const messageRoutes = require('./routes/message.route.js');
+const { connectDB } = require('./config/mongo.config.js');
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const app = express();
 
@@ -27,5 +28,6 @@ app.use('/api/messages', messageRoutes);
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port: http://localhost:${PORT}`);
+  connectDB();
 });
