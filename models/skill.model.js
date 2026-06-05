@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { getDb } = require('../config/mongo.config.js');
 
 const skillSchema = new mongoose.Schema({
     name: {
@@ -7,12 +6,16 @@ const skillSchema = new mongoose.Schema({
         required: true
     },
     level: {
-        type: String,
+        type: Number,
+        required: true
+    },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true
     }
 }, { timestamps: true });
 
-const db = getDb();
-const Skill = db.model('Skill', skillSchema);
+const Skill = mongoose.model('Skill', skillSchema);
 
 module.exports = Skill;

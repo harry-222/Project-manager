@@ -1,22 +1,12 @@
 const express = require('express');
 const skillRouter = express.Router();
+const skillController = require('../controllers/skill.controller');
+const { verifyUser, ensureSkillOwner } = require('../middleware/skill.middleware');
 
-skillRouter.get('/', (req, res) => {
-  res.json({ message: 'GET /api/skills endpoint' });
-});
-
-skillRouter.post('/', (req, res) => {
-  res.json({ message: 'POST /api/skills endpoint', data: req.body });
-});
-
-skillRouter.put('/:id', (req, res) => {
-  const { id } = req.params;
-  res.json({ message: `PUT /api/skills/${id} endpoint`, id, data: req.body });
-});
-
-skillRouter.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  res.json({ message: `DELETE /api/skills/${id} endpoint`, id });
-});
+skillRouter.get('/', skillController.getAllSkills);
+skillRouter.post('/', verifyUser, skillController.createSkill);
+skillRouter.put('/:id', verifyUser, ensureSkillOwner, skillController.updateSkill);
+skillRouter.delete('/:id', verifyUser, ensureSkillOwner,  skillController.deleteSkill);
+skillRouter.get('/my-skills', verifyUser, skillController.getAllMySkills);
 
 module.exports = skillRouter;
