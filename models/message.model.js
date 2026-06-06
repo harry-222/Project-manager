@@ -1,25 +1,18 @@
 const mongoose = require('mongoose');
-const { getDb } = require('../config/mongo.config.js');
 
 const MessageSchema = new mongoose.Schema({
-    name: { 
-        type: String, 
-        required: true, 
-        trim: true 
-    },
-    email: { 
-        type: String, 
-        required: true, 
-        trim: true, 
-        lowercase: true 
-    },
-    subject: { 
-        type: String, 
-        trim: true 
+    sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
     message: { 
         type: String, 
         required: true 
+    },
+    createdAt: { 
+        type: Date, 
+        default: Date.now 
     }
 }, { 
     timestamps: { 
@@ -28,7 +21,6 @@ const MessageSchema = new mongoose.Schema({
     } 
 });
 
-const db = getDb();
-const Message = db.model('Message', MessageSchema);
+const Message = mongoose.model('Message', MessageSchema);
 
 module.exports = Message;

@@ -1,17 +1,26 @@
 const express = require('express');
 const router = express.Router();
+const messageController = require('../controllers/message.controller');
+const { verifyUser, ensureMessageExists, ensureMessageParticipant, ensureMessageOwner } = require('../middleware/message.middleware');
 
-router.post('/', (req, res) => {
-  res.status(201).json({ message: 'Message created', data: req.body });
-});
+router.get('/', verifyUser, messageController.getMessages);
 
-router.get('/', (req, res) => {
-  res.json({ message: 'Messages retrieved', data: [] });
-});
+router.post('/', verifyUser, messageController.createMessage);
 
-router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  res.json({ message: `Message ${id} deleted` });
-});
+router.put(
+    '/:id',
+    verifyUser,
+    ensureMessageExists,
+    ensureMessageOwner,
+    messageController.updateMessage
+);
+
+router.delete(
+    '/:id',
+    verifyUser,
+    ensureMessageExists,
+    ensureMessageOwner,
+    messageController.deleteMessage
+);
 
 module.exports = router;
