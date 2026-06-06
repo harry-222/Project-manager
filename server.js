@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
+const path = require('path');
 const swaggerUi = require('swagger-ui-express');
 
 const swaggerDocument = require('./swagger.json');
@@ -27,6 +28,9 @@ app.use(cors({
 
 app.use(cookieParser());
 app.use(bodyParser.json());
+
+// Serve static files (images) from uploads folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (req, res) => {
   res.send('API is running successfully');

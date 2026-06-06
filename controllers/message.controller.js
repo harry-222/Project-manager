@@ -36,7 +36,7 @@ class MessageController {
 
   async getMessages(req, res) {
     try {
-      const messages = await Message.find().sort({ createdAt: -1 });
+      const messages = await Message.find().populate('sender', 'username').sort({ createdAt: -1 });
       res.json({ message: 'Messages retrieved', data: messages });
     } catch (error) {
       throw new ApplicationError(error.message || 'Server error', 500);
