@@ -1,4 +1,5 @@
 const Message = require('../models/message.model.js');
+const { ApplicationError } = require('../middleware/error.middleware.js');
 
 class MessageController {
   async createMessage(req, res) {
@@ -8,7 +9,7 @@ class MessageController {
       await newMessage.save();
       res.status(201).json({ message: 'Message sent', data: newMessage });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      throw new ApplicationError(error.message || 'Server error', 500);
     }
   }
 
@@ -17,19 +18,19 @@ class MessageController {
     const newMessage = req.body?.message || undefined;
 
     if (!newMessage) {
-      return res.status(400).json({ message: 'Message content is required' });
+      throw new ApplicationError('Message content is required', 400);
     }
 
     try {
       const message = await Message.findById(id);
       if (!message) {
-        return res.status(404).json({ message: 'Message not found' });
+        throw new ApplicationError('Message not found', 404);
       }
       message.message = newMessage;
       await message.save();
       res.status(201).json({ message: 'Message received', data: message });
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      throw new ApplicationError(error.message || 'Server error', 500);
     }
   }
 
@@ -38,7 +39,7 @@ class MessageController {
       const messages = await Message.find().sort({ createdAt: -1 });
       res.json({ message: 'Messages retrieved', data: messages });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      throw new ApplicationError(error.message || 'Server error', 500);
     }
   }
 
@@ -49,12 +50,12 @@ class MessageController {
       const message = await Message.findByIdAndDelete(id);
 
       if (!message) {
-        return res.status(404).json({ message: 'Message not found' });
+        throw new ApplicationError('Message not found', 404);
       }
 
       res.json({ message: `Message ${id} deleted` });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      throw new ApplicationError(error.message || 'Server error', 500);
     }
   }
 }

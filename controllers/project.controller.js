@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const Project = require('../models/project.model');
 const User = require('../models/user.model');
+const { ApplicationError } = require('../middleware/error.middleware.js');
 
 class ProjectController {
 
@@ -10,7 +11,7 @@ class ProjectController {
             const projects = await Project.find().populate('owner', 'username email');
             res.json(projects);
         } catch (error) {
-            res.status(500).json({ message: 'Error fetching projects', error: error.message });
+            throw new ApplicationError(error.message || 'Error fetching projects', 500);
         }
     }
 
@@ -19,27 +20,20 @@ class ProjectController {
             const { id } = req.params;
 
             if (!mongoose.Types.ObjectId.isValid(id)) {
-                return res.status(404).json({
-                    message: 'Project not found'
-                });
+                throw new ApplicationError("Invalid project ID", 400);
             }
 
             const project = await Project.findById(id)
                 .populate('owner', 'username email');
 
             if (!project) {
-                return res.status(404).json({
-                    message: 'Project not found'
-                });
+                throw new ApplicationError("Project not found", 404);
             }
 
             return res.json(project);
 
         } catch (error) {
-            return res.status(500).json({
-                message: 'Error fetching project',
-                error: error.message
-            });
+            throw new ApplicationError(error.message || 'Error fetching project', 500);
         }
     }
 
@@ -50,7 +44,7 @@ class ProjectController {
             await project.save();
             res.status(201).json(project);
         } catch (error) {
-            res.status(500).json({ message: 'Error creating project', error: error.message });
+            throw new ApplicationError(error.message || 'Error creating project', 500);
         }
     }
 
@@ -70,12 +64,12 @@ class ProjectController {
             });
 
             if (!updatedProject) {
-                return res.status(404).json({ message: 'Project not found' });
+                throw new ApplicationError("Project not found", 404);
             }
 
             res.json(updatedProject);
         } catch (error) {
-            res.status(500).json({ message: 'Error updating project', error: error.message });
+            throw new ApplicationError(error.message || 'Error updating project', 500);
         }
     }
 
@@ -84,7 +78,7 @@ class ProjectController {
             await Project.findByIdAndDelete(req.params.id);
             res.json({ message: 'Project deleted' });
         } catch (error) {
-            res.status(500).json({ message: 'Error deleting project', error: error.message });
+            throw new ApplicationError(error.message || 'Error deleting project', 500);
         }
     }
 }

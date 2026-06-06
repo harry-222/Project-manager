@@ -11,6 +11,7 @@ const projectRoutes = require('./routes/project.route.js');
 const skillRoutes = require('./routes/skill.route.js');
 const messageRoutes = require('./routes/message.route.js');
 const { connectDB } = require('./config/mongo.config.js');
+const { infoLogger, errorLogger, ApplicationError } = require('./middleware/error.middleware.js');
 
 dotenv.config({ quiet: true });
 
@@ -26,6 +27,13 @@ app.get('/', (req, res) => {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    infoLogger.info(`${req.method} ${req.originalUrl} ${res.statusCode}`);
+  });
+  next();
+});
+
 app.use('/api/auth', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/skills', skillRoutes);
@@ -33,7 +41,20 @@ app.use('/api/messages', messageRoutes);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+app.use((req, res) => {
+  res.status(404).send(`API not found. Please check our documentation for more information at localhost:${PORT}/api-docs`);
+});
+
+app.use((err, req, res, next) => {
+  console.error("Error caught by error handler:", err.message);
+  errorLogger.error(`${req.method} ${req.originalUrl} ${err.message}`);
+  if (err instanceof ApplicationError && err.statusCode < 500) {
+    return res.status(err.statusCode).json({ message: err.message });
+  }
+  return res.status(500).json({ message: 'Internal Server Error' });
+});
+
+app.listen(PORT, async () => {
   console.log(`Server is running on port: http://localhost:${PORT}`);
-  connectDB();
+  await connectDB();
 });

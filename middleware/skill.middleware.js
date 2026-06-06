@@ -2,12 +2,13 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const User = require('../models/user.model');
 const Skill = require('../models/skill.model');
+const { ApplicationError } = require('./error.middleware.js');
 
 const verifyUser = async (req, res, next) => {
     try {
         const token = req.cookies?.token;
         if (!token) {
-            return res.status(401).json({ message: 'Unauthorized: missing token' });
+            throw new ApplicationError('Unauthorized: missing token', 401);
         }
 
         let payload;
@@ -15,46 +16,44 @@ const verifyUser = async (req, res, next) => {
             payload = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
         } catch (verifyError) {
             console.log(verifyError);
-            return res.status(401).json({ message: 'Unauthorized: invalid token' });
+            throw new ApplicationError('Unauthorized: invalid token', 401);
         }
 
         const userId = payload.id || payload.userId || payload._id;
         if (!userId) {
-            return res.status(401).json({ message: 'Unauthorized: invalid token payload' });
+            throw new ApplicationError('Unauthorized: invalid token payload', 401);
         }
 
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(401).json({ message: 'Unauthorized: invalid user' });
+            throw new ApplicationError('Unauthorized: invalid user', 401);
         }
 
         req.user = user;
         next();
     } catch (error) {
-        res.status(500).json({ message: 'Error verifying user', error: error.message });
+        throw new ApplicationError(error.message, 500);
     }
 };
 
 const ensureSkillOwner = async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(404).json({
-                message: 'Skill not found'
-            });
+            throw new ApplicationError('Skill not found', 404);
         }
         const skill = await Skill.findById(req.params.id);
         if (!skill) {
-            return res.status(404).json({ message: 'Skill not found' });
+            throw new ApplicationError('Skill not found', 404);
         }
 
         if (!skill.owner || skill.owner.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: 'Forbidden: not skill owner' });
+            throw new ApplicationError('Forbidden: not skill owner', 403);
         }
 
         req.skill = skill;
         next();
     } catch (error) {
-        res.status(500).json({ message: 'Error validating skill owner', error: error.message });
+        throw new ApplicationError(error.message || 'Error validating skill owner', 500);
     }
 };
 

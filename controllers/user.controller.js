@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model.js');
+const { ApplicationError } = require('../middleware/error.middleware.js');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 const JWT_EXPIRES_IN = '1h';
@@ -11,12 +12,12 @@ class UserController {
       const { username, email, password } = req.body;
 
       if (!username || !email || !password) {
-        return res.status(400).json({ message: 'Missing required fields' });
+        throw new ApplicationError("Missing required fields", 400);
       }
 
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        return res.status(409).json({ message: 'Email already registered' });
+        throw new ApplicationError("Email already in use", 409);
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,7 +33,7 @@ class UserController {
         },
       });
     } catch (error) {
-      return res.status(500).json({ message: 'Server error', error: error.message });
+      throw new ApplicationError(error.message || 'Server error during registration', 500);
     }
   }
 
@@ -41,17 +42,17 @@ class UserController {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({ message: 'Missing email or password' });
+        throw new ApplicationError("Missing required fields", 400);
       }
 
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+        throw new ApplicationError("Invalid email or password", 401);
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+        throw new ApplicationError("Invalid email or password", 401);
       }
 
       const token = jwt.sign(
@@ -76,7 +77,7 @@ class UserController {
         },
       });
     } catch (error) {
-      return res.status(500).json({ message: 'Server error', error: error.message });
+      throw new ApplicationError(error.message || 'Server error during login', 500);
     }
   }
 }

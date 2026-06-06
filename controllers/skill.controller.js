@@ -1,5 +1,6 @@
 const Skill = require('../models/skill.model');
 const mongoose = require('mongoose');
+const { ApplicationError } = require('../middleware/error.middleware.js');
 
 class SkillController {
     getAllSkills = async (req, res) => {
@@ -7,7 +8,7 @@ class SkillController {
             const skills = await Skill.find();
             res.json(skills);
         } catch (err) {
-            res.status(500).json({ error: 'Server error', details: err.message });
+            throw new ApplicationError(err.message || 'Server error', 500);
         }
     }
 
@@ -16,7 +17,7 @@ class SkillController {
             const skills = await Skill.find({ owner: req.user._id });
             res.json(skills);
         } catch (err) {
-            res.status(500).json({ error: 'Server error', details: err.message });
+            throw new ApplicationError(err.message || 'Server error', 500);
         }
     }
 
@@ -26,7 +27,7 @@ class SkillController {
             await skill.save();
             res.status(201).json(skill);
         } catch (err) {
-            res.status(500).json({ error: 'Server error', details: err.message });
+            throw new ApplicationError(err.message || 'Server error', 500);
         }
     }
 
@@ -36,7 +37,7 @@ class SkillController {
             
             // Check if id is a valid ObjectId
             if (!mongoose.Types.ObjectId.isValid(id)) {
-                return res.status(404).json({ error: 'Skill not found' });
+                throw new ApplicationError('Skill not found', 404);
             }
             
             const skill = await Skill.findByIdAndUpdate(id, req.body, {
@@ -45,12 +46,12 @@ class SkillController {
             });
 
             if (!skill) {
-                return res.status(404).json({ error: 'Skill not found' });
+                throw new ApplicationError('Skill not found', 404);
             }
 
             res.json(skill);
         } catch (err) {
-            res.status(500).json({ error: 'Server error', details: err.message });
+            throw new ApplicationError(err.message || 'Server error', 500);
         }
     }
 
@@ -60,18 +61,18 @@ class SkillController {
             
             // Check if id is a valid ObjectId
             if (!mongoose.Types.ObjectId.isValid(id)) {
-                return res.status(404).json({ error: 'Skill not found' });
+                throw new ApplicationError('Skill not found', 404);
             }
             
             const skill = await Skill.findByIdAndDelete(id);
 
             if (!skill) {
-                return res.status(404).json({ error: 'Skill not found' });
+                throw new ApplicationError('Skill not found', 404);
             }
 
             res.json({ message: 'Skill deleted', skill });
         } catch (err) {
-            res.status(500).json({ error: 'Server error', details: err.message });
+            throw new ApplicationError(err.message || 'Server error', 500);
         }
     }
 
