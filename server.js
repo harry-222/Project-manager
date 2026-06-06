@@ -3,6 +3,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 
 const userRoutes = require('./routes/user.route.js');
 const projectRoutes = require('./routes/project.route.js');
@@ -21,6 +23,8 @@ app.use(bodyParser.json());
 app.get('/', (req, res) => {
   res.send('API is running successfully');
 });
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use('/api/auth', userRoutes);
 app.use('/api/projects', projectRoutes);
