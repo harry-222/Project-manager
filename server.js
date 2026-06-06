@@ -4,8 +4,8 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
 
+const swaggerDocument = require('./swagger.json');
 const userRoutes = require('./routes/user.route.js');
 const projectRoutes = require('./routes/project.route.js');
 const skillRoutes = require('./routes/skill.route.js');

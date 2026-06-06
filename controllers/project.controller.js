@@ -45,7 +45,7 @@ class ProjectController {
 
     async createProject (req, res) {
         try {
-            const projectData = { ...req.body, owner: req.user._id };
+            const projectData = { ...req.body, owner: req.user._id, image: req.file ? req.file.path : undefined };
             const project = new Project(projectData);
             await project.save();
             res.status(201).json(project);
@@ -60,10 +60,18 @@ class ProjectController {
             delete updates.owner;
             delete updates._id;
 
+            if (req.file) {
+                updates.image = req.file ? req.file.path : undefined;
+            }
+
             const updatedProject = await Project.findByIdAndUpdate(req.params.id, updates, {
                 new: true,
                 runValidators: true,
             });
+
+            if (!updatedProject) {
+                return res.status(404).json({ message: 'Project not found' });
+            }
 
             res.json(updatedProject);
         } catch (error) {
